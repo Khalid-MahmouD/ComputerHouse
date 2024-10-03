@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Computer House | عمليات الاصلاح</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <h1>Computer House</h1>
+        <ul>
+          <li><a href="index.html">Add</a></li>
+          <li><a href="search.html" class="active">Search</a></li>
+        </ul>
+        <ul>
+          <li>
+            <a href="#" class="status-link done-status">
+              Done <span id="done-count">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="status-link waiting-status">
+              Waiting <span id="waiting-count">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="status-link between-status">
+              Between <span id="between-count">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container">
+      <form id="search-form">
+        <label for="name">
+          <h3>اسم العميل</h3>
+          <input type="text" name="name" id="name" />
+        </label>
+        <br />
+        <br />
+        <input type="button" value="بحث" id="search-button" />
+      </form>
+
+      <div id="results"></div>
+      <!-- Div to display search results -->
+    </div>
+
+    <script>
+      async function updateStatusCounts() {
+        try {
+          const response = await fetch('http://localhost:5000/status-count');
+          const data = await response.json();
+
+          // Update the HTML with the counts
+          document.getElementById('done-count').innerText = data.done;
+          document.getElementById('waiting-count').innerText = data.waiting;
+          document.getElementById('between-count').innerText = data.between;
+        } catch (error) {
+          console.error('Error fetching status counts:', error);
+        }
+      }
+
+      async function searchByStatus(status) {
+        const resultsContainer = document.getElementById('results');
+        const nameInput = document.getElementById('name').value; // Get customer name input
+
+        try {
+          // If name is input, include it in the search, else search all customers with the selected status
+          const response = await fetch(
+            `http://localhost:5000/search?name=${nameInput}&status=${status}`
+          );
+          const customers = await response.json();
+          displayResults(customers);
+        } catch (error) {
+          console.error('Error fetching customers:', error);
+          resultsContainer.innerHTML = 'Error fetching customers.';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const resultsContainer = document.getElementById('results');
+        const searchButton = document.querySelector('input[type="button"]'); // Your search button
+
+        // Click event listener for the search button
+        searchButton.addEventListener('click', async () => {
+          const nameInput = document.getElementById('name').value; // Get customer name input
+
+          if (!nameInput) {
+            alert('يرجى إدخال اسم العميل للبحث.');
+            return;
+          }
+
+          try {
+            // Perform a search based on the customer name only
+            const response = await fetch(
+              `http://localhost:5000/search?name=${nameInput}`
+            );
+            if (response.ok) {
+              const data = await response.json();
+              displayResults(data);
+            } else {
+              alert('لم يتم العثور على أي عميل.');
+            }
+          } catch (error) {
+            console.error('Error fetching customer data:', error);
+            alert('حدث خطأ أثناء البحث عن العملاء.');
+          }
+        });
+      });
+
+      function displayResults(data) {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = ''; // Clear previous results
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = '<p>لا توجد نتائج.</p>';
+          return; // Exit if no data found
+        }
+
+        data.forEach((customer) => {
+          const specifications = customer.specifications;
+          let specificationsHtml = '<ul>';
+
+          for (const key in specifications) {
+            if (specifications.hasOwnProperty(key)) {
+              specificationsHtml += `<li>${key}: ${specifications[key]}</li>`;
+            }
+          }
+          specificationsHtml += '</ul>';
+
+          const customerDiv = document.createElement('div');
+          customerDiv.innerHTML = `
+         <div class="customer-profile">
+        <h3 class="customer-name">اسم العميل: ${customer.customerName}</h3>
+        <p class="device-category">فئة الجهاز: ${customer.deviceCategory}</p>
+        <p class="device-issue">نوع العطل: ${customer.issue}</p>
+        <p class="specifications-title">المواصفات:</p>
+        ${specificationsHtml}
+        <p class="status ${customer.status}">الحالة: ${customer.status}</p>
+        <p class="to-fix">للإصلاح: ${customer.toFix}</p>
+        <button class="status-button" onclick="updateStatus('${customer._id}', '${customer.status}')">
+            تحديث الحالة
+        </button>
+    </div>
+                `;
+          resultsDiv.appendChild(customerDiv);
+        });
+      }
+
+      async function updateStatus(customerId, currentStatus) {
+        let newStatus = '';
+        console.log(customerId, currentStatus);
+        if (currentStatus === 'waiting') {
+          newStatus = 'between';
+        } else if (currentStatus === 'between') {
+          newStatus = 'done';
+        }
+
+        if (!newStatus) return; // Exit if no status update is needed
+
+        try {
+          const response = await fetch(
+            `http://localhost:5000/update-status/${customerId}`,
+            {
+              method: 'PATCH',
+            }
+          );
+
+          if (response.ok) {
+            const updatedCustomer = await response.json();
+            alert(`تم تحديث الحالة إلى ${newStatus}`);
+            // Refresh the results based on the updated status
+            searchByStatus(currentStatus); // Refresh the results based on the current status
+          } else {
+            alert('حدث خطأ أثناء تحديث الحالة.');
+          }
+        } catch (error) {
+          console.error('Error updating customer status:', error);
+          alert('حدث خطأ أثناء تحديث الحالة.');
+        }
+      }
+
+      window.onload = updateStatusCounts;
+    </script>
+  </body>
+</html>

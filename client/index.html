@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Computer House | عمليات الاصلاح</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <h1>Computer House</h1>
+        <ul>
+          <li><a href="index.html" class="active">Add</a></li>
+          <li><a href="search.html">Search</a></li>
+        </ul>
+        <ul>
+          <li>
+            <a href="#" class="status-link done-status">
+              Done <span id="done-count">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="status-link waiting-status">
+              Waiting <span id="waiting-count">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="status-link between-status">
+              Between <span id="between-count">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <div class="container">
+      <form id="form-device" action="" method="">
+        <div class="input-text">
+          <h3 for="name">اسم العميل</h3>
+          <input type="text" name="name" id="name" placeholder="اسم العميل" />
+        </div>
+        <label for="device-category">Select Device Category:</label>
+        <select
+          name="device"
+          id="device-category"
+          onchange="showSpecifications()"
+          required
+        >
+          <option value="">--Select--</option>
+          <option value="computer">computer</option>
+          <option value="laptop">laptop</option>
+          <option value="dvr">dvr</option>
+          <option value="other">other</option>
+        </select>
+
+        <div id="specifications"></div>
+
+        <div class="issue">
+          <h3>Issue</h3>
+          <label for="issue-windows">
+            <input
+              type="radio"
+              name="issue"
+              id="issue-windows"
+              value="windows"
+            />
+            Windows
+          </label>
+          <label for="issue-hardware">
+            <input
+              type="radio"
+              name="issue"
+              id="issue-hardware"
+              value="hardware"
+            />
+            Hardware
+          </label>
+        </div>
+        <textarea name="" id="to-fix"></textarea>
+
+        <div class="status">
+          <h3>Status</h3>
+          <label for="status-waiting">
+            <input
+              type="radio"
+              name="status"
+              id="status-waiting"
+              value="waiting"
+              checked
+            />
+            Waiting
+          </label>
+          <label for="status-between">
+            <input
+              type="radio"
+              name="status"
+              id="status-between"
+              value="between"
+            />
+            Between
+          </label>
+          <label for="status-done">
+            <input type="radio" name="status" id="status-done" value="done" />
+            Done
+          </label>
+        </div>
+        <br />
+        <br />
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
