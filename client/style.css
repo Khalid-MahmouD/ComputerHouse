@@ -175,3 +175,17 @@ input[type='radio']:checked + label {
     padding: 15px;
   }
 }
+
+@media (max-width: 512px) {
+  nav {
+    flex-direction: column;
+  }
+  nav h1 {
+    margin-bottom: 10px;
+  }
+  nav ul {
+    flex-direction: row;
+    gap: 10px;
+    margin: 15px 0;
+  }
+}
