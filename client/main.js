@@ -114,6 +114,12 @@ document
     const status = document.querySelector('input[name="status"]:checked').value;
     const specifications = {};
 
+    // check for customer name customerName
+    if (customerName.trim() === '') {
+      alert('Please enter a valid customer name.');
+      return;
+    }
+
     // Check if device category is computer, laptop, or DVR
     if (deviceCategory === 'computer' || deviceCategory === 'laptop') {
       // Retrieve the selected RAM and Storage for computer and laptop
@@ -130,6 +136,7 @@ document
       }
 
       // Check if all necessary specifications are selected
+
       if (
         !specifications.ram ||
         !specifications.storage ||
