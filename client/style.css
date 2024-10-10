@@ -22,12 +22,22 @@ header {
 }
 
 nav {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+
+  /* justify-content: space-between; */
   align-items: center;
+  justify-content: center;
   padding: 0 20px;
+  position: relative;
 }
 
+nav img {
+  /* width: 50px; */
+  /* height: 50px; */
+  border-radius: 50%;
+  margin-right: 10px;
+}
 nav h1 {
   font-size: 1.8em;
 }
@@ -36,6 +46,12 @@ nav ul {
   list-style: none;
   display: flex;
   gap: 15px;
+}
+
+nav ul:nth-child(4) {
+  grid-column: 2 / span 3;
+  align-items: center;
+  justify-self: center;
 }
 
 nav ul li {
@@ -176,12 +192,15 @@ input[type='radio']:checked + label {
   }
 }
 
-@media (max-width: 512px) {
+@media (max-width: 530px) {
   nav {
     flex-direction: column;
   }
   nav h1 {
     margin-bottom: 10px;
+  }
+  nav ul:nth-child(4) {
+    grid-column: 1 / span 3;
   }
   nav ul {
     flex-direction: row;
