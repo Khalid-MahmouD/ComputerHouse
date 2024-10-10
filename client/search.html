@@ -1,10 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <title>Computer House | عمليات الاصلاح</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="styleSearch.css" />
+    <style>
+      /* Styling for the customer result container */
+      .customer-profile {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+      }
+
+      .customer-name {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+
+      .specifications-title {
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      .status-button {
+        padding: 8px 12px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        margin-top: 10px;
+        border-radius: 5px;
+      }
+
+      .status-button.done {
+        background-color: green;
+      }
+
+      .status-button.between {
+        background-color: orange;
+      }
+
+      .status-button.waiting {
+        background-color: red;
+      }
+
+      .status-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #results {
+        width: 100%;
+        max-width: 1000px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      label,
+      input[type='radio'] {
+        margin-bottom: 10px;
+      }
+
+      /* Aligning radio buttons horizontally */
+      .issue-radio-group {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .issue-radio-group label {
+        flex: 1;
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -40,9 +141,8 @@
           <h3>اسم العميل</h3>
           <input type="text" name="name" id="name" />
         </label>
-        <br />
-        <br />
-        <input type="button" value="بحث" id="search-button" />
+
+        <!-- <input type="button" value="بحث" id="search-button" /> -->
       </form>
 
       <div id="results"></div>
@@ -50,141 +150,121 @@
     </div>
 
     <script>
-      async function updateStatusCounts() {
-        try {
-          const response = await fetch('http://localhost:5000/status-count');
-          const data = await response.json();
-
-          // Update the HTML with the counts
-          document.getElementById('done-count').innerText = data.done;
-          document.getElementById('waiting-count').innerText = data.waiting;
-          document.getElementById('between-count').innerText = data.between;
-        } catch (error) {
-          console.error('Error fetching status counts:', error);
-        }
-      }
-
-      async function searchByStatus(status) {
-        const resultsContainer = document.getElementById('results');
-        const nameInput = document.getElementById('name').value; // Get customer name input
-
-        try {
-          // If name is input, include it in the search, else search all customers with the selected status
-          const response = await fetch(
-            `http://localhost:5000/search?name=${nameInput}&status=${status}`
-          );
-          const customers = await response.json();
-          displayResults(customers);
-        } catch (error) {
-          console.error('Error fetching customers:', error);
-          resultsContainer.innerHTML = 'Error fetching customers.';
-        }
-      }
-
       document.addEventListener('DOMContentLoaded', () => {
-        const resultsContainer = document.getElementById('results');
-        const searchButton = document.querySelector('input[type="button"]'); // Your search button
+        const searchInput = document.getElementById('name');
 
-        // Click event listener for the search button
-        searchButton.addEventListener('click', async () => {
-          const nameInput = document.getElementById('name').value; // Get customer name input
+        // Event listener for the search input (trigger search as user types)
+        searchInput.addEventListener('input', function () {
+          searchCustomers();
+        });
 
-          if (!nameInput) {
-            alert('يرجى إدخال اسم العميل للبحث.');
-            return;
-          }
+        // Function to search customers by name or ID
+        function searchCustomers() {
+          const searchValue = searchInput.value.toLowerCase();
+          const customers = JSON.parse(localStorage.getItem('customers')) || [];
 
-          try {
-            // Perform a search based on the customer name only
-            const response = await fetch(
-              `http://localhost:5000/search?name=${nameInput}`
+          // Filter customers by name or ID
+          const filteredCustomers = customers.filter((customer) => {
+            return (
+              customer.customerName.toLowerCase().includes(searchValue) ||
+              customer.id.toLowerCase().includes(searchValue)
             );
-            if (response.ok) {
-              const data = await response.json();
-              displayResults(data);
-            } else {
-              alert('لم يتم العثور على أي عميل.');
-            }
-          } catch (error) {
-            console.error('Error fetching customer data:', error);
-            alert('حدث خطأ أثناء البحث عن العملاء.');
-          }
-        });
-      });
+          });
 
-      function displayResults(data) {
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = ''; // Clear previous results
-
-        if (data.length === 0) {
-          resultsDiv.innerHTML = '<p>لا توجد نتائج.</p>';
-          return; // Exit if no data found
+          displayResults(filteredCustomers);
         }
 
-        data.forEach((customer) => {
-          const specifications = customer.specifications;
-          let specificationsHtml = '<ul>';
+        // Display results
+        function displayResults(customers) {
+          const resultsDiv = document.getElementById('results');
+          resultsDiv.innerHTML = ''; // Clear previous results
 
-          for (const key in specifications) {
-            if (specifications.hasOwnProperty(key)) {
-              specificationsHtml += `<li>${key}: ${specifications[key]}</li>`;
-            }
-          }
-          specificationsHtml += '</ul>';
-
-          const customerDiv = document.createElement('div');
-          customerDiv.innerHTML = `
-         <div class="customer-profile">
-        <h3 class="customer-name">اسم العميل: ${customer.customerName}</h3>
-        <p class="device-category">فئة الجهاز: ${customer.deviceCategory}</p>
-        <p class="device-issue">نوع العطل: ${customer.issue}</p>
-        <p class="specifications-title">المواصفات:</p>
-        ${specificationsHtml}
-        <p class="status ${customer.status}">الحالة: ${customer.status}</p>
-        <p class="to-fix">للإصلاح: ${customer.toFix}</p>
-        <button class="status-button" onclick="updateStatus('${customer._id}', '${customer.status}')">
-            تحديث الحالة
-        </button>
-    </div>
-                `;
-          resultsDiv.appendChild(customerDiv);
-        });
-      }
-
-      async function updateStatus(customerId, currentStatus) {
-        let newStatus = '';
-        console.log(customerId, currentStatus);
-        if (currentStatus === 'waiting') {
-          newStatus = 'between';
-        } else if (currentStatus === 'between') {
-          newStatus = 'done';
-        }
-
-        if (!newStatus) return; // Exit if no status update is needed
-
-        try {
-          const response = await fetch(
-            `http://localhost:5000/update-status/${customerId}`,
-            {
-              method: 'PATCH',
-            }
-          );
-
-          if (response.ok) {
-            const updatedCustomer = await response.json();
-            alert(`تم تحديث الحالة إلى ${newStatus}`);
-            // Refresh the results based on the updated status
-            searchByStatus(currentStatus); // Refresh the results based on the current status
+          if (customers.length === 0) {
+            resultsDiv.innerHTML = '<p>No customers found.</p>';
           } else {
-            alert('حدث خطأ أثناء تحديث الحالة.');
+            customers.forEach((customer) => {
+              resultsDiv.innerHTML += `
+                <div class="customer-profile">
+                  <h3 class="customer-name"> ${customer.id} | ${
+                customer.customerName
+              }</h3>
+                  <p>Device: ${customer.deviceCategory}</p>
+                  <p>Status: ${customer.status}</p>
+                  <p>Specifications: RAM: ${
+                    customer.specifications.ram
+                  }, Storage: ${customer.specifications.storage}, Charger: ${
+                customer.specifications.charger || 'N/A'
+              }</p>
+                  <p>Issue: ${customer.issue} ${customer.toFix}</p>
+                  <button class="status-button ${
+                    customer.status
+                  }" onclick="updateStatus('${customer.id}', '${
+                customer.status
+              }')">
+                    Update Status: ${customer.status}
+                  </button>
+                </div>
+              `;
+            });
           }
-        } catch (error) {
-          console.error('Error updating customer status:', error);
-          alert('حدث خطأ أثناء تحديث الحالة.');
         }
-      }
 
-      window.onload = updateStatusCounts;
+        // Function to update the status of a customer
+        window.updateStatus = function (customerId, currentStatus) {
+          let newStatus = '';
+          console.log(typeof customerId);
+          // Cycle through status: 'waiting' -> 'between' -> 'done'
+          if (currentStatus === 'waiting') {
+            newStatus = 'between';
+          } else if (currentStatus === 'between') {
+            newStatus = 'done';
+          } else {
+            return; // No change needed if status is 'done'
+          }
+
+          // Get customers from localStorage
+          const customers = JSON.parse(localStorage.getItem('customers')) || [];
+          console.log(typeof customers[0].id);
+          // Find and update the customer's status
+          const updatedCustomers = customers.map((customer) => {
+            if (+customer.id === +customerId) {
+              console.log('found it');
+              return { ...customer, status: newStatus };
+            }
+            return customer;
+          });
+
+          // Save the updated customer data back to localStorage
+          localStorage.setItem('customers', JSON.stringify(updatedCustomers));
+
+          // Refresh the display
+          alert(`Status updated to ${newStatus}`);
+          updateStatusCounts(); // Update status counts in the UI
+          displayResults(updatedCustomers); // Refresh the results
+        };
+
+        // Function to update status counts (Done, Waiting, Between)
+        function updateStatusCounts() {
+          const customers = JSON.parse(localStorage.getItem('customers')) || [];
+
+          const doneCount = customers.filter(
+            (customer) => customer.status === 'done'
+          ).length;
+          const waitingCount = customers.filter(
+            (customer) => customer.status === 'waiting'
+          ).length;
+          const betweenCount = customers.filter(
+            (customer) => customer.status === 'between'
+          ).length;
+
+          document.getElementById('done-count').innerText = doneCount;
+          document.getElementById('waiting-count').innerText = waitingCount;
+          document.getElementById('between-count').innerText = betweenCount;
+        }
+
+        // Update status counts on load
+        updateStatusCounts();
+      });
     </script>
   </body>
 </html>

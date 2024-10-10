@@ -25,18 +25,18 @@ function showSpecifications() {
   
           <!-- Radio buttons for Storage -->
           <div class="storage">
-            <h3>Storage</h3>
+            <h3>storage</h3>
             <label for="storage-80gb">
-              <input type="radio" name="storage" id="storage-80gb" value="80GB" />80GB
+              <input type="radio" name="storage" id="storage-80gb" value="80GB" />  80GB
             </label>
-            <label for="storage-128gb">
-              <input type="radio" name="storage" id="storage-128gb" value="128GB" />128GB
+            <label for="storage-160gb">
+              <input type="radio" name="storage" id="storage-160gb" value="160GB" />  160GB
             </label>
-            <label for="storage-240gb">
-              <input type="radio" name="storage" id="storage-240gb" value="240GB" />240GB
+            <label for="storage-250gb">
+              <input type="radio" name="storage" id="storage-250gb" value="250GB" />  250GB
             </label>
             <label for="storage-500gb">
-              <input type="radio" name="storage" id="storage-500gb" value="500GB" />500GB
+              <input type="radio" name="storage" id="storage-500gb" value="500GB" />  500GB
             </label>
           </div>
         </div>`;
@@ -62,18 +62,18 @@ function showSpecifications() {
   
           <!-- Radio buttons for Storage -->
           <div class="storage">
-            <h3>Storage</h3>
+            <h3>storage</h3>
             <label for="storage-80gb">
-              <input type="radio" name="storage" id="storage-80gb" value="80GB" />80GB
+              <input type="radio" name="storage" id="storage-80gb" value="80GB" />  80GB
             </label>
-            <label for="storage-128gb">
-              <input type="radio" name="storage" id="storage-128gb" value="128GB" />128GB
+            <label for="storage-160gb">
+              <input type="radio" name="storage" id="storage-160gb" value="160GB" />  160GB
             </label>
-            <label for="storage-240gb">
-              <input type="radio" name="storage" id="storage-240gb" value="240GB" />240GB
+            <label for="storage-250gb">
+              <input type="radio" name="storage" id="storage-250gb" value="250GB" />  250GB
             </label>
             <label for="storage-500gb">
-              <input type="radio" name="storage" id="storage-500gb" value="500GB" />500GB
+              <input type="radio" name="storage" id="storage-500gb" value="500GB" />  500GB
             </label>
           </div>
           <!-- Radio buttons for Charger -->
@@ -109,6 +109,7 @@ document
 
     const customerName = document.getElementById('name').value;
     const deviceCategory = document.getElementById('device-category').value;
+    const issue = document.querySelector('input[name="issue"]:checked').value;
     const toFix = document.getElementById('to-fix').value;
     const status = document.querySelector('input[name="status"]:checked').value;
     const specifications = {};
@@ -152,11 +153,12 @@ document
 
     // Prepare the data for submission
     const submissionData = {
+      id: generateNextId(),
       customerName: document.getElementById('name').value,
       deviceCategory: document.getElementById('device-category').value,
-      issue: document.querySelector('input[name="issue"]:checked')?.value,
-      toFix: document.getElementById('to-fix').value, // Ensure this field exists
-      status: document.querySelector('input[name="status"]:checked').value, // Check this is being selected correctly
+      issue,
+      toFix,
+      status, // Check this is being selected correctly
       specifications: {
         ram: document.querySelector('input[name="ram"]:checked')?.value,
         storage: document.querySelector('input[name="storage"]:checked')?.value,
@@ -166,37 +168,47 @@ document
 
     console.log(submissionData);
     try {
-      const response = await fetch('http://localhost:5000/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submissionData),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert('Device submitted successfully!');
-        console.log(data);
-      } else {
-        console.error('Error submitting device');
-      }
+      let customers = JSON.parse(localStorage.getItem('customers')) || [];
+      customers.push(submissionData);
+      localStorage.setItem('customers', JSON.stringify(customers));
+      alert('Customer data saved locally!');
     } catch (error) {
       console.error('Error submitting device:', error);
     }
   });
 
-async function updateStatusCounts() {
-  try {
-    const response = await fetch('http://localhost:5000/status-count');
-    const data = await response.json();
-    // Update the HTML with the counts
-    document.getElementById('done-count').innerText = data.done;
-    document.getElementById('waiting-count').innerText = data.waiting;
-    document.getElementById('between-count').innerText = data.between;
-  } catch (error) {
-    console.error('Error fetching status counts:', error);
+function generateNextId() {
+  let lastId = localStorage.getItem('lastId'); // Get the last used ID from localStorage
+
+  if (lastId === null) {
+    lastId = 0; // If no ID exists, start with 0
+  } else {
+    lastId = parseInt(lastId); // Parse the string to an integer
   }
+
+  const newId = lastId + 1; // Increment the ID
+
+  // localStorage.setItem('lastId', newId); // Save the new ID as 'lastId' in localStorage
+
+  return newId; // Return the new incremented ID
+}
+
+function updateStatusCounts() {
+  const customers = JSON.parse(localStorage.getItem('customers')) || [];
+
+  const doneCount = customers.filter(
+    (customer) => customer.status === 'done'
+  ).length;
+  const waitingCount = customers.filter(
+    (customer) => customer.status === 'waiting'
+  ).length;
+  const betweenCount = customers.filter(
+    (customer) => customer.status === 'between'
+  ).length;
+
+  document.getElementById('done-count').innerText = doneCount;
+  document.getElementById('waiting-count').innerText = waitingCount;
+  document.getElementById('between-count').innerText = betweenCount;
 }
 
 window.onload = updateStatusCounts;

@@ -1,5 +1,5 @@
-/* General Styles */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
 /* General Reset */
 * {
   margin: 0;
@@ -65,11 +65,13 @@ nav .status-link span {
   top: -10px;
   right: -15px;
 }
+
 #done-count,
 #waiting-count,
 #between-count {
   margin: 0 10px;
 }
+
 .container {
   max-width: 800px;
   margin: 40px auto;
@@ -89,33 +91,20 @@ form h3 {
   color: #34495e;
 }
 
-form .input-text input,
-form select,
-form textarea {
+form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+form input[type='text'] {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1.5rem;
 }
 
-form select {
-  padding: 10px;
-  background-color: #f9f9f9;
-}
-
-form .issue label,
-form .status label {
-  margin-right: 10px;
-  font-size: 0.9em;
-}
-
-form textarea {
-  height: 100px;
-}
-
-button {
+form input[type='button'] {
   background-color: #34495e;
   color: white;
   border: none;
@@ -126,45 +115,39 @@ button {
   transition: background-color 0.3s ease;
 }
 
-button:hover {
+form input[type='button']:hover {
   background-color: #2c3e50;
 }
 
-div.ram > label:nth-child(n),
-div.storage > label:nth-child(n),
-div.issue > label:nth-child(n),
-div.charger > label:nth-child(n),
-div.status > label:nth-child(n) {
-  word-spacing: 10px !important;
-  font-size: 1.4rem;
+/* Styling for the search results section */
+#results {
+  margin-top: 20px;
 }
 
-.status input,
-.issue input {
-  margin-right: 5px;
+#results h3 {
+  color: #34495e;
+  margin-bottom: 10px;
 }
 
-input[type='radio']:checked + label {
-  color: #f39c12;
+.result-item {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.ram,
-.storage,
-.issue,
-.charger,
-.status {
-  display: flex;
-  flex-direction: column;
-  /* justify-content: center; */
-  gap: 10px;
+
+.result-item h4 {
+  margin-bottom: 5px;
+  color: #333;
 }
-.ram h3,
-.storage h3,
-.issue h3,
-.charger h3,
-.status h3 {
-  font-size: 2rem;
-  margin-top: 1rem;
+
+.result-item p {
+  margin: 0;
+  color: #777;
 }
+
 @media (max-width: 768px) {
   nav ul {
     flex-direction: column;
