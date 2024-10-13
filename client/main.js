@@ -108,15 +108,20 @@ document
     event.preventDefault();
 
     const customerName = document.getElementById('name').value;
+    const customerPhoneNumber = document.getElementById('phone').value;
     const deviceCategory = document.getElementById('device-category').value;
     const issue = document.querySelector('input[name="issue"]:checked').value;
     const toFix = document.getElementById('to-fix').value;
     const status = document.querySelector('input[name="status"]:checked').value;
+    const deviceId = generateNextId();
     const specifications = {};
 
     // check for customer name customerName
     if (customerName.trim() === '') {
       alert('Please enter a valid customer name.');
+      return;
+    } else if (customerPhoneNumber === '') {
+      alert('Please enter a valid phone number.');
       return;
     }
 
@@ -159,13 +164,15 @@ document
     }
 
     // Prepare the data for submission
+
     const submissionData = {
-      id: generateNextId(),
-      customerName: document.getElementById('name').value,
-      deviceCategory: document.getElementById('device-category').value,
+      deviceId, // Assign the generated unique ID
+      customerName,
+      customerPhoneNumber,
+      deviceCategory,
       issue,
       toFix,
-      status, // Check this is being selected correctly
+      status,
       specifications: {
         ram: document.querySelector('input[name="ram"]:checked')?.value,
         storage: document.querySelector('input[name="storage"]:checked')?.value,
@@ -173,19 +180,19 @@ document
       },
     };
 
-    console.log(submissionData);
     try {
       let customers = JSON.parse(localStorage.getItem('customers')) || [];
       customers.push(submissionData);
       localStorage.setItem('customers', JSON.stringify(customers));
       alert('Customer data saved locally!');
+      document.getElementById('form-device').reset(); // Resets the form
     } catch (error) {
       console.error('Error submitting device:', error);
     }
   });
 
 function generateNextId() {
-  let lastId = localStorage.getItem('lastId'); // Get the last used ID from localStorage
+  let lastId = localStorage.getItem('deviceId'); // Get the last used ID from localStorage
 
   if (lastId === null) {
     lastId = 0; // If no ID exists, start with 0
@@ -194,8 +201,8 @@ function generateNextId() {
   }
 
   const newId = lastId + 1; // Increment the ID
-
-  // localStorage.setItem('lastId', newId); // Save the new ID as 'lastId' in localStorage
+  console.log(newId); //
+  localStorage.setItem('deviceId', newId); // Save the new ID as 'deviceId' in localStorage
 
   return newId; // Return the new incremented ID
 }
